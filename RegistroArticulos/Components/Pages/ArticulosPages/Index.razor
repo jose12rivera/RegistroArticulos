@@ -1,0 +1,135 @@
+﻿@page "/Articulos/Index"
+@inject ArticulosServices articulosServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Articulos</PageTitle>
+<EditForm Model="ListaArticulos" class="card shadow-lg bolder p-3 rounded">
+    <div class="card-header bg-danger text-white text-center p-2 rounded">
+        <h3 style="font-weight: bold;" class="md-3 font-weight: bold;">Consulta Articulos</h3>
+    </div>
+    <div class="row  md-3 align-content-center">
+        <div class="col-md-3">
+            <label for="filtro " class="form-label">Filtrar Por:</label>
+            <select @bind="filtro" class="form-select">
+                <option value="Id">ArticuloId</option>
+                <option value="Nombre">Nombre</option>
+                <option value="Descripcion">Descripcion</option>
+                <option value="Precio">Precio</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="valorfiltro" class="form-label">Busqueda:</label>
+            <div class="input-group">
+                <input @bind="valorfiltro" class="form-control"/>
+                <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                    <i class="bi bi-search-circle"></i>
+                    Buscar
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-15">
+                    <div class="col-md-15 text-end">
+                        <a href="/Articulos/Create" class="btn btn-outline-success" type="button">
+                            <i class="bi bi-pencil-square"></i>
+                            Crear
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table table-responsive">
+            <table class=" table table-bordered text-center">
+                <thead class="bg-danger text-white">
+                    <tr>
+                        <th>ArticuloId</th>
+                        <th>Nombre</th>
+                        <th>Descripcion</th>
+                        <th>Precio</th>
+                        <th>Ver</th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var a in ListaArticulos)
+                    {
+                        <tr>
+                            <td>@a.ArticuloId</td>
+                            <td>@a.Nombre</td>
+                            <td>@a.Descripcion</td>
+                            <td>@a.Precio</td>
+
+                            <td>
+                                <a href="/Articulos/Details/@a.ArticuloId" class="btn btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+
+                            <td>
+                                <a href="/Articulos/Edit/@a.ArticuloId" class="btn btn-outline-success">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-outline-danger ml-2"@onclick="()=>IrEliminar(a.ArticuloId)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <p>Total:@ListaArticulos.Count</p>
+    </div>
+
+</EditForm>
+@code {
+   
+    public List<Articulos> ListaArticulos { get; set; } = new List<Articulos>();
+    public string filtro = "Id";
+    public string valorfiltro = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaArticulos = await articulosServices.Listar(a => true);
+    }
+
+    public async Task Buscar()
+    {
+        if (string.IsNullOrWhiteSpace(valorfiltro))
+        {
+
+            ListaArticulos = await articulosServices.Listar(a => true);
+        }
+        else
+        {
+            if(filtro=="Id"&&int.TryParse(valorfiltro,out int ArticuloId))
+            {
+
+                ListaArticulos = await articulosServices.Listar(a => a.ArticuloId==ArticuloId);
+            }else if (filtro == "Nombre")
+            {
+
+                ListaArticulos = await articulosServices.Listar(a => a.Nombre.Contains(valorfiltro));
+            }else if (filtro == "Descripcion")
+            {
+                ListaArticulos = await articulosServices.Listar(a => a.Descripcion.Contains(valorfiltro));
+            }else if(filtro =="Precio"&&decimal.TryParse(valorfiltro,out decimal Precio))
+            {
+                ListaArticulos = await articulosServices.Listar(a => a.Precio==Precio);
+            }
+        }
+    }
+
+    private async Task IrEliminar(int ArticuloId)
+    {
+        navigationManager.NavigateTo($"/Articulos/Delete/ArticuloId={ArticuloId}");
+    }
+}

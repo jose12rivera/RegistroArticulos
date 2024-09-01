@@ -1,0 +1,107 @@
+﻿@page "/Articulos/Create"
+@inject ArticulosServices articulosServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<EditForm Model="articulo" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <div class="card-header bg-danger text-white text-center p-2 rounded">
+        <h3 style="font-weight: bold;" class="md-3 font-weight: bold;">Registro Articulos</h3>
+    </div> 
+
+    <div class="card-body">
+        @* ArticuloId *@
+        <div class="row">
+            <div class="col-md-10 mb-5">
+                <label for=" ArticuloId" class="form-label">ArticuloId:</label>
+                <div class="input-group">
+                    <div style="width: 405; height: 1mm">
+                        <InputNumber @bind-Value="articulo.ArticuloId" class="form-control" style="font-size: 0.8rem;" aria-describedby="bottonbuscar" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @*   Nombre *@
+        <div class="mb-5">
+            <label for="Nombre" class="form-label">Nombre:</label>
+            <InputText @bind-Value="articulo.Nombre" class="form-control" />
+            <ValidationMessage For="@(()=>articulo.Nombre)" />
+        </div>
+        @*  Descripcion *@
+        <div class="mb-5">
+            <label for=" Descripcion" class="form-label"> Descripcion:</label>
+            <InputText @bind-Value="articulo. Descripcion" class="form-control" />
+            <ValidationMessage For="@(()=>articulo. Descripcion)" />
+        </div>
+        @*   Precio *@
+        <div class="mb-5">
+            <label for="Precio" class="form-label">Precio:</label>
+            <InputNumber @bind-Value="articulo.Precio" class="form-control" />
+            <ValidationMessage For="@(()=>articulo.Precio)" />
+        </div>
+    </div>
+    <div class="card-footer: align; justify-content-center: ">
+        <div class="input-group">
+            <button type="button" class="btn btn-outline-secondary ml-2" @onclick="Nuevo"><span class="bi bi-plus"></span>Nuevo</button>
+            <button type="submit" class="btn btn-outline-success ml-2"><span class="bi bi-check-circle"></span>Guardar</button>
+            <button type="button" class="btn btn-outline-primary ml-2" @onclick="Volver"><span class="bi bi-box-arrow-left"></span>Volver</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int ArticuloId { get; set; }
+    public Articulos? articulo { get; set; } = new Articulos();
+    private bool existe = false;
+
+    public async Task Nuevo()
+    {
+        articulo = new Articulos();
+        existe = false;
+    }
+    public async Task Buscar()
+    {
+        existe = false;
+        var encontrado = await articulosServices.Buscar(articulo.ArticuloId);
+        if (encontrado != null)
+        {
+            articulo = encontrado;
+        }
+        else
+        {
+            Nuevo();
+        }
+    }
+    public async Task<bool> Validar()
+    {
+        existe = await articulosServices.Existe(articulo.ArticuloId, articulo.Nombre);
+        return !existe;
+    }
+    public async Task Guardar()
+    {
+        if (!await Validar())
+        {
+            return;
+        }
+        var guadado = await articulosServices.Guardar(articulo);
+        if (guadado)
+        {
+            Nuevo();
+        }
+    }
+    public async Task Eliminar()
+    {
+        var eliminado = await articulosServices.Eliminar(articulo.ArticuloId);
+        Nuevo();
+    }
+
+    public async Task Volver()
+    {
+        navigationManager.NavigateTo("/Articulos/Index");
+    }
+
+
+}
+

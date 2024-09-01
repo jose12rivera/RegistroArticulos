@@ -1,0 +1,58 @@
+﻿@page "/Articulos/Details"
+@page "/Articulos/Details/{ArticuloId:int}"
+@inject ArticulosServices articulosServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Detalles de Articulos</PageTitle>
+@if(articulos != null)
+{
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header bg-danger text-white text-center p-2 rounded">
+                <h3 class="text-center"><strong>Detalles del Tecnico</strong></h3>
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><strong>ArticuloId:</strong>@articulos.ArticuloId</li>
+                                <li><strong>Nombre:</strong>@articulos.Nombre</li>
+                                <li><strong>Descripcion:</strong>@articulos.Descripcion</li>
+                                <li><strong>Precio:</strong>@articulos.Precio</li>
+
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-outline-primary ml-2" @onclick="Volver"><span class="bi bi-box-arrow-left"></span>Volver</button>
+        </div>
+    </div>
+}
+else
+{
+    <p>No encontrado</p>
+}
+@code {
+    [Parameter]
+    public int ArticuloId { get; set; }
+    public Articulos? articulos { get; set; } = new Articulos();
+    private bool existe = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+       
+            articulos = await articulosServices.Buscar(ArticuloId) ?? new Articulos();
+        
+    }
+    public async Task Volver()
+    {
+        navigationManager.NavigateTo("/Articulos/Index");
+    }
+}

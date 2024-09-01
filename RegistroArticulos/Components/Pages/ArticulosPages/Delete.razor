@@ -1,0 +1,85 @@
+﻿@page "/Articulos/Delete"
+@page "/Articulos/Delete/ArticuloId={ArticuloId:int}"
+@inject ArticulosServices articulosServices
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header bg-danger text-white text-center p-2 rounded">
+                <h3><strong>Eliminar el Tecnico</strong></h3>
+            </div>
+            <div class="card-footer  text-center">
+                <h3 class="text-danger">Esta seguro que quiere eliminar el tecnico?</h3>
+            </div>
+            <div class="container">
+            <div class="row justify-content-center">
+                    <div class="col-md-6">
+                       <div class="card shadow-lg">
+                        <div class="card-header bg-danger text-white text-center p-2 rounded">
+                            <h3 ><strong>Eliminar</strong></h3>
+                           </div>
+                           <div class="card-body">
+                               <div class="bolder-primary border-2 bolder">
+                                   <div class="card-body">
+                                       <div class="row">
+                                           <div class="col-md-6">
+                                              <ul class="list-unstyled">
+                                                <li><strong>ArticuloId:</strong>@articulos.ArticuloId</li>
+                                                <li><strong>Nombre:</strong>@articulos.Nombre</li>
+                                                <li><strong>Descripcion:</strong>@articulos.Descripcion</li>
+                                                <li><strong>Precio:</strong>@articulos.Precio</li>
+
+                                              </ul>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                       </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+      <div class="card-footer text-center">
+        <button type="button" class="btn btn-outline-danger ml-2" @onclick="EliminarArticulos"><span class="bi bi-trash"></span>Eliminar</button>
+        <button type="button" class="btn btn-outline-primary ml-2" @onclick="Volver"><span class="bi bi-box-arrow-left"></span>Volver</button>
+
+      </div>
+    </div>
+@if(articulos ==null)
+{
+    <p>No encontrado</p>
+}
+@code {
+    [Parameter]
+    public int ArticuloId { get; set; }
+    public Articulos? articulos { get; set; } = new Articulos();
+    private bool existe = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ArticuloId != 0)
+        {
+            articulos = await articulosServices.Buscar(ArticuloId);
+        }
+    }
+
+    public async Task EliminarArticulos()
+    {
+        if(ArticuloId ==0|| articulos == null)
+        {
+            return;
+        }
+        if(await articulosServices.Eliminar(ArticuloId))
+        {
+            Volver();
+        }
+    }
+    public async Task Volver()
+    {
+        navigationManager.NavigateTo("/Articulos/Index ");
+    }
+}
